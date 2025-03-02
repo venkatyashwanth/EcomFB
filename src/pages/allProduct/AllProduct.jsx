@@ -1,8 +1,11 @@
 import { useNavigate } from "react-router";
 import Layout from "../../components/layout/Layout";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import MyContext from "../../context/myContext";
 import Loader from "../../components/loader/Loader";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart, deleteFromCart } from "../../redux/cartSlice";
+import toast from "react-hot-toast";
 
 // productData 
 // const productData = [
@@ -84,6 +87,20 @@ const AllProduct = () => {
     const navigate = useNavigate();
     const context = useContext(MyContext);
     const { loading, getAllProduct } = context;
+    const cartItems = useSelector((state) => state.cart);
+    const dispatch = useDispatch();
+    const addCart = (item) => {
+        dispatch(addToCart(item));
+        toast.success("Add to cart");
+    }
+    const deleteCart = (item) => {
+        dispatch(deleteFromCart(item));
+        toast.success("Deleted from cart")
+    }
+
+    useEffect(() => {
+        localStorage.setItem('cart', JSON.stringify(cartItems));
+    }, [cartItems])
     return (
         <Layout>
             <div className="py-8">
@@ -105,7 +122,7 @@ const AllProduct = () => {
                                     <div key={index} className="p-4 w-full md:w-1/4">
                                         <div className="h-full border border-gray-300 rounded-xl overflow-hidden shadow-md cursor-pointer">
                                             <img
-                                                onClick={() => navigate('/productinfo')}
+                                                onClick={() => navigate(`/productinfo/${id}`)}
                                                 className="lg:h-80  h-96 w-full"
                                                 src={productImageUrl}
                                                 alt="blog"
@@ -121,11 +138,27 @@ const AllProduct = () => {
                                                     ₹{price}
                                                 </h1>
 
-                                                <div className="flex justify-center ">
+                                                <div className="flex justify-center">
+                                                    {cartItems.some((p) => p.id === item.id) ?
+
+                                                        <button
+                                                            onClick={() => deleteCart(item)}
+                                                            className="bg-red-700 hover:bg-pink-600 w-full text-white py-[4px]"
+                                                        >Delete From Cart</button>
+                                                        :
+                                                        <button
+                                                            onClick={() => addCart(item)}
+                                                            className="bg-red-700 hover:bg-pink-600 w-full text-white py-[4px]"
+                                                        >Add To Cart</button>
+                                                    }
+                                                </div>
+
+
+                                                {/* <div className="flex justify-center ">
                                                     <button className=" bg-pink-500 hover:bg-pink-600 w-full text-white py-[4px] rounded-lg font-bold">
                                                         Add To Cart
                                                     </button>
-                                                </div>
+                                                </div> */}
                                             </div>
                                         </div>
                                     </div>

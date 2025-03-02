@@ -1,7 +1,10 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MyContext from "../../context/myContext";
 import Loader from "../loader/Loader";
+import { useDispatch,useSelector } from "react-redux";
+import { addToCart,deleteFromCart } from "../../redux/cartSlice";
+import toast from "react-hot-toast";
 
 // const productData = [
 //     {
@@ -46,6 +49,24 @@ const HomePageProductCard = () => {
     const navigate = useNavigate();
     const context = useContext(MyContext);
     const { loading, getAllProduct } = context;
+
+    const cartItems = useSelector((state) => state.cart);
+    const dispatch = useDispatch();
+
+    const addCart = (item) => {
+        dispatch(addToCart(item));
+        toast.success("Add to cart")
+    }
+
+    const deleteCart = (item) => {
+        dispatch(deleteFromCart(item));
+        toast.error("Delete Cart")
+    }
+
+    useEffect(() => {
+        localStorage.setItem('cart', JSON.stringify(cartItems));
+    }, [cartItems])
+
     return (
         <div className="mt-10">
             {/* Heading */}
@@ -66,17 +87,27 @@ const HomePageProductCard = () => {
                                 <div key={index} className="p-4 w-full md:w-1/4">
                                     <div className="h-full border border-gray-300 rounded-xl overflow-hidden shadow-md cursor-pointer">
                                         <img
-                                            onClick={() => navigate('/productinfo')}
+                                            onClick={() => navigate(`/productinfo/${id}`)}
                                             className="h-96 lg:h-80 w-full" src={productImageUrl} alt="img" />
                                         <div className="p-6">
                                             <h2 className="tracking-widest text-xs font-medium text-gray-400 mb-1">E-Bharat</h2>
                                             <h1 className="text-lg font-medium text-gray-900 mb-3">{title.slice(0, 25)}</h1>
                                             <h1 className="text-lg font-medium text-gray-900 mb-3"> ₹{price}</h1>
-
                                             <div className="flex justify-center">
-                                                <button className="bg-pink-500 hover:bg-pink-600 w-full text-white py-[4px] rounded-lg font-bold">
-                                                    Add To Cart
-                                                </button>
+                                                {cartItems.some((p) => p.id === item.id) ?
+                                                    <button
+                                                        onClick={() => deleteCart(item)}
+                                                        className="bg-pink-500 hover:bg-pink-600 w-full text-white py-[4px] rounded-lg font-bold">
+                                                        Delete From Cart
+                                                    </button>
+                                                    :
+                                                    <button
+                                                        onClick={() => addCart(item)}
+                                                        className="bg-pink-500 hover:bg-pink-600 w-full text-white py-[4px] rounded-lg font-bold">
+                                                        Add To Cart
+                                                    </button>
+                                                }
+
                                             </div>
                                         </div>
                                     </div>
